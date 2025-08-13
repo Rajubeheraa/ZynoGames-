@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman - ZynoGames</title>
+    <link rel="icon" type="image/x-icon" href="../images/zg.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
+            padding-top: 40px; 
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #00f0ff;
+            text-align: center;
+        }
+        .game-container-hangman {
+            background-color: #0d0d1a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 240, 255, 0.2);
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hangman-drawing {
+        width: 220px;
+        height: 250px;
+        position: relative;
+        margin: 20px auto 40px auto;
+        }
+
+        /* Base */
+        .hangman-drawing::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 220px;
+            height: 5px;
+            background-color: #ff3366;
+        }
+
+        /* Vertical post */
+        .gallows-post {
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            width: 8px;
+            height: 100%;
+            background-color: #00f0ff;
+        }
+
+        /* Horizontal top beam */
+        .gallows-beam {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: 140px;
+            height: 8px;
+            background-color: #00f0ff;
+        }
+
+        /* Rope */
+        .gallows-rope {
+            position: absolute;
+            top: 8px;
+            left: 150px;
+            width: 5px;
+            height: 40px;
+            background-color: #00f0ff;
+        }
+        .hangman-drawing .gallows-post {
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            width: 5px;
+            height: 100%;
+            background-color: #00f0ff;
+        }
+        .hangman-drawing .gallows-beam {
+            position: absolute;
+            top: 0;
+            left: 20px;
+            width: 120px;
+            height: 5px;
+            background-color: #00f0ff;
+        }
+        .hangman-drawing .gallows-rope {
+            position: absolute;
+            top: 0;
+            right: 50px; 
+            width: 5px;
+            height: 40px;
+            background-color: #00f0ff;
+        }
+        .hangman-drawing .gallows-stand { 
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            width: 5px;
+            height: 50px;
+            background-color: #00f0ff;
+            transform: rotate(45deg);
+            transform-origin: bottom left;
+        }
+
+        .hangman-drawing .body-part {
+            position: absolute;
+            background-color: #ff3366;
+            border-radius: 50%;
+            display: none; 
+            z-index: 10;
+        }
+        #head { width: 40px; height: 40px; top: 35px; right: 30px; border-radius: 50%; border: 3px solid #ff3366; background: transparent;} 
+        #body { width: 5px; height: 60px; top: 75px; right: 49px; background-color: #ff3366;}
+        #leftArm { width: 5px; height: 30px; top: 85px; right: 58px; transform: rotate(-45deg); transform-origin: top;}
+        #rightArm { width: 5px; height: 30px; top: 85px; right: 40px; transform: rotate(45deg); transform-origin: top;}
+        #leftLeg { width: 5px; height: 40px; top: 130px; right: 58px; transform: rotate(45deg); transform-origin: top;}
+        #rightLeg { width: 5px; height: 40px; top: 130px; right: 40px; transform: rotate(-45deg); transform-origin: top;}
+
+
+        .word-display {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.5em;
+            letter-spacing: 10px;
+            margin-bottom: 30px;
+            color: #00f0ff;
+        }
+        .guessed-letters {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+        .guess-input-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+        #letterInput {
+            width: 60px;
+            padding: 10px;
+            text-align: center;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            border: 2px solid #ff3366;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            border-radius: 5px;
+            outline: none;
+        }
+        .guess-btn {
+            background-color: #ff3366;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .guess-btn:hover {
+            background-color: #e6004c;
+        }
+        #message {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8em;
+            margin-top: 20px;
+            min-height: 1.5em;
+        }
+        .reset-game-btn {
+            margin-top: 30px;
+            background-color: #00f0ff;
+            color: #0d0d1a;
+            padding: 12px 25px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: none;
+        }
+        .reset-game-btn:hover {
+            background-color: #00b3cc;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 2em;
+            }
+            .hangman-drawing {
+                width: 150px;
+                height: 200px;
+                margin-bottom: 20px;
+            }
+            .hangman-drawing .gallows-rope {
+                right: 40px;
+            }
+            #head { width: 30px; height: 30px; top: 30px; right: 28px;}
+            #body { height: 50px; top: 60px; right: 46px;}
+            #leftArm { height: 25px; top: 68px; right: 54px;}
+            #rightArm { height: 25px; top: 68px; right: 38px;}
+            #leftLeg { height: 35px; top: 105px; right: 54px;}
+            #rightLeg { height: 35px; top: 105px; right: 38px;}
+
+
+            .word-display {
+                font-size: 1.8em;
+                letter-spacing: 5px;
+            }
+            .guessed-letters {
+                font-size: 1em;
+            }
+            #letterInput {
+                width: 50px;
+                font-size: 1.2em;
+                padding: 8px;
+            }
+            .guess-btn {
+                font-size: 1em;
+                padding: 8px 15px;
+            }
+            #message {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1 class="site-title" style="font-size: 1.8em;">ZynoGames - Hangman</h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../index.html#games-section">Games</a></li>
+                    <li><a href="../index.html#contact-section">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h2>Hangman</h2>
+        <div class="game-container-hangman">
+            <div class="hangman-drawing">
+                <div class="gallows-post" id="gallowsPost"></div>
+<div class="gallows-beam" id="gallowsBeam"></div>
+<div class="gallows-rope" id="gallowsRope"></div>
+<div class="gallows-stand" id="gallowsStand"></div>
+
+<div class="body-part" id="head"></div>
+<div class="body-part" id="body"></div>
+<div class="body-part" id="leftArm"></div>
+<div class="body-part" id="rightArm"></div>
+<div class="body-part" id="leftLeg"></div>
+<div class="body-part" id="rightLeg"></div>
+
+            </div>
+
+            <div class="word-display" id="wordDisplay"></div>
+            <div class="guessed-letters">Guessed Letters: <span id="guessedLetters"></span></div>
+
+            <div class="guess-input-group">
+                <input type="text" id="letterInput" maxlength="1" placeholder="A" autofocus>
+                <button id="guessBtn" class="guess-btn">Guess</button>
+            </div>
+            
+            <p id="message"></p>
+            <button id="resetGameBtn" class="reset-game-btn">Play Again</button>
+        </div>
+    </main>
+
+    <footer class="main-footer" style="position: relative; width: 100%;">
+        <div class="container">
+            <h3>There are other games as well — explore them for a better experience.</h3>
+        </div>
+    </footer> 
+
+    <script>
+        const words = ["JAVASCRIPT", "PYTHON", "HTML", "CSS", "GAMING", "WEBSITE", "DEVELOPER", "ALGORITHM", "PROGRAMMING", "INTERNET",
+        "DATABASE", "SERVER", "CLIENT", "BROWSER", "VARIABLE", "FUNCTION", "OBJECT", "ARRAY", "MODULE", "COMPILER",
+        "DEBUGGER", "FRAMEWORK", "VERSION", "NETWORK", "SECURITY"];
+
+        let selectedWord = '';
+        let guessedWord = [];
+        let wrongGuesses = 0;
+        const maxWrongGuesses = 6; 
+        let guessedLetters = [];
+        let gameOver = false;
+
+        const hangmanParts = [
+            document.getElementById('head'),
+            document.getElementById('body'),
+            document.getElementById('leftArm'),
+            document.getElementById('rightArm'),
+            document.getElementById('leftLeg'),
+            document.getElementById('rightLeg')
+        ];
+
+        const wordDisplay = document.getElementById('wordDisplay');
+        const guessedLettersDisplay = document.getElementById('guessedLetters');
+        const letterInput = document.getElementById('letterInput');
+        const guessBtn = document.getElementById('guessBtn');
+        const messageDisplay = document.getElementById('message');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+
+        function initGame() {
+        selectedWord = words[Math.floor(Math.random() * words.length)];
+        guessedWord = Array(selectedWord.length).fill('_');
+        wrongGuesses = 0;
+        guessedLetters = [];
+        gameOver = false;
+        const randomIndex = Math.floor(Math.random() * selectedWord.length);
+        const revealedLetter = selectedWord[randomIndex];
+        guessedWord[randomIndex] = revealedLetter;
+    
+        letterInput.value = '';
+        letterInput.disabled = false;
+        guessBtn.disabled = false;
+        resetGameBtn.style.display = 'none';
+
+        messageDisplay.textContent = `A hint! The letter '${revealedLetter}' is in the word.`;
+        messageDisplay.style.color = '#00f0ff';
+
+        updateDisplay();
+        hideHangmanParts();
+        letterInput.focus();
+        }
+
+
+        function updateDisplay() {
+            wordDisplay.textContent = guessedWord.join(' ');
+            guessedLettersDisplay.textContent = guessedLetters.join(', ');
+        }
+
+        function hideHangmanParts() {
+            hangmanParts.forEach(part => part.style.display = 'none');
+        }
+
+        function drawHangmanPart() {
+            if (wrongGuesses > 0 && wrongGuesses <= hangmanParts.length) {
+                hangmanParts[wrongGuesses - 1].style.display = 'block';
+            }
+        }
+
+        function checkGuess() {
+            if (gameOver) return;
+
+            const guess = letterInput.value.toUpperCase();
+            letterInput.value = ''; // Clear input field
+            letterInput.focus();
+
+            if (!guess.match(/^[A-Z]$/)) {
+                messageDisplay.textContent = 'Please enter a single letter from A-Z.';
+                messageDisplay.style.color = '#ff3366';
+                return;
+            }
+
+            if (guessedLetters.includes(guess)) {
+                messageDisplay.textContent = `You already guessed '${guess}'. Try another!`;
+                messageDisplay.style.color = '#00f0ff';
+                return;
+            }
+
+            guessedLetters.push(guess);
+
+            if (selectedWord.includes(guess)) {
+                for (let i = 0; i < selectedWord.length; i++) {
+                    if (selectedWord[i] === guess) {
+                        guessedWord[i] = guess;
+                    }
+                }
+                messageDisplay.textContent = `Good guess! '${guess}' is in the word.`;
+                messageDisplay.style.color = '#7BC043'; // Green 
+            } else {
+                wrongGuesses++;
+                drawHangmanPart();
+                messageDisplay.textContent = `Sorry, '${guess}' is not in the word.`;
+                messageDisplay.style.color = '#ff3366'; // Red
+            }
+
+            updateDisplay();
+            checkGameStatus();
+        }
+
+        function checkGameStatus() {
+            if (guessedWord.join('') === selectedWord) {
+                messageDisplay.textContent = `Congratulations! You guessed the word: ${selectedWord}!`;
+                messageDisplay.style.color = '#7BC043';
+                gameOver = true;
+            } else if (wrongGuesses >= maxWrongGuesses) {
+                messageDisplay.textContent = `Game Over! The word was: ${selectedWord}`;
+                messageDisplay.style.color = '#ff3366';
+                gameOver = true;
+            }
+
+            if (gameOver) {
+                letterInput.disabled = true;
+                guessBtn.disabled = true;
+                resetGameBtn.style.display = 'block';
+            }
+        }
+
+        guessBtn.addEventListener('click', checkGuess);
+        letterInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                checkGuess();
+            }
+        });
+        resetGameBtn.addEventListener('click', initGame);
+
+        initGame();
+    </script>
+</body>
+</html>

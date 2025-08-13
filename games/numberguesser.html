@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Guesser - ZynoGames</title>
+    <link rel="icon" type="image/x-icon" href="../images/zg.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
+            padding-top: 80px; 
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #00f0ff;
+            text-align: center;
+        }
+        .game-area {
+            background-color: #0d0d1a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 240, 255, 0.2);
+            text-align: center;
+            width: 100%;
+        }
+        .instructions {
+            font-size: 1.1em;
+            margin-bottom: 25px;
+            color: #ccc;
+        }
+        #guessInput {
+            width: 80%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #00f0ff;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-size: 1.5em;
+            text-align: center;
+            border-radius: 5px;
+            outline: none;
+        }
+        #guessInput::placeholder {
+            color: #999;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px; 
+            margin-bottom: 20px;
+        }
+        .guess-btn, .giveup-btn {
+            background-color: #ff3366;
+            color: #ffffff;
+            padding: 12px 25px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .guess-btn:hover, .giveup-btn:hover {
+            background-color: #e6004c;
+        }
+        .giveup-btn {
+            background-color: #882222; 
+        }
+        .giveup-btn:hover {
+            background-color: #661111;
+        }
+        #message {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8em;
+            margin-top: 25px;
+            color: #7BC043; 
+            min-height: 1.5em; 
+        }
+        #attempts {
+            font-size: 1em;
+            color: #00f0ff;
+            margin-top: 15px;
+        }
+        .reset-game-btn {
+            margin-top: 30px;
+            background-color: #00f0ff;
+            color: #0d0d1a;
+            padding: 12px 25px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: none; 
+        }
+        .reset-game-btn:hover {
+            background-color: #00b3cc;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 2em;
+            }
+            .instructions {
+                font-size: 1em;
+            }
+            #guessInput {
+                width: 90%;
+                font-size: 1.2em;
+            }
+            #message {
+                font-size: 1.4em;
+            }
+            .button-group {
+                flex-direction: column; 
+                gap: 10px;
+            }
+            .guess-btn, .giveup-btn {
+                font-size: 1em;
+                padding: 10px 20px;
+                width: 100%; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1 class="site-title" style="font-size: 1.8em;">ZynoGames - Number Guesser</h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../index.html#games-section">Games</a></li>
+                    <li><a href="../index.html#contact-section">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h2>Number Guesser</h2>
+        <div class="game-area">
+            <p class="instructions">I'm thinking of a number between 1 and 100. Can you guess it?</p>
+            <input type="number" id="guessInput" min="1" max="100" placeholder="Enter your guess">
+            <div class="button-group">
+                <button id="submitGuessBtn" class="guess-btn">Guess!</button>
+                <button id="giveUpBtn" class="giveup-btn">Give Up</button>
+            </div>
+            <p id="message"></p>
+            <p id="attempts">Attempts: 0</p>
+            <button id="resetGameBtn" class="reset-game-btn">Play Again</button>
+        </div>
+    </main>
+
+    <footer class="main-footer" style="position: relative; width: 100%;">
+        <div class="container">
+            <h3>There are other games as well — explore them for a better experience.</h3>
+        </div>
+    </footer> 
+
+    <script>
+        let secretNumber;
+        let attempts = 0;
+        let gameOver = false;
+
+        const guessInput = document.getElementById('guessInput');
+        const submitGuessBtn = document.getElementById('submitGuessBtn');
+        const giveUpBtn = document.getElementById('giveUpBtn'); 
+        const messageDisplay = document.getElementById('message');
+        const attemptsDisplay = document.getElementById('attempts');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+
+        function initGame() {
+            secretNumber = Math.floor(Math.random() * 100)+ 1; 
+            attempts = 0;
+            gameOver = false;
+            messageDisplay.textContent = '';
+            attemptsDisplay.textContent = 'Attempts: 0';
+            guessInput.value = '';
+            guessInput.disabled = false;
+            submitGuessBtn.disabled = false;
+            giveUpBtn.style.display = 'inline-block'; 
+            resetGameBtn.style.display = 'none';
+            messageDisplay.style.color = '#7BC043'; 
+            console.log("Secret Number (for testing): " + secretNumber); 
+        }
+
+        function endGame(won = false) {
+            gameOver = true;
+            guessInput.disabled = true;
+            submitGuessBtn.disabled = true;
+            giveUpBtn.style.display = 'none'; 
+            resetGameBtn.style.display = 'block';
+
+            if (!won) { 
+                messageDisplay.textContent = `You gave up! The secret number was ${secretNumber}.`;
+                messageDisplay.style.color = '#ff3366'; // Red 
+            }
+        }
+
+        function checkGuess() {
+            if (gameOver) return;
+
+            const userGuess = parseInt(guessInput.value);
+
+            if (isNaN(userGuess) || userGuess < 1 || userGuess > 100) {
+                messageDisplay.textContent = 'Please enter a valid number between 1 and 100.';
+                messageDisplay.style.color = '#ff3366'; // Red 
+                return;
+            }
+
+            attempts++;
+            attemptsDisplay.textContent = `Attempts: ${attempts}`;
+
+            if (userGuess === secretNumber) {
+                messageDisplay.textContent = `Congratulations! You guessed the number ${secretNumber} in ${attempts} attempts!`;
+                messageDisplay.style.color = '#7BC043'; // Green 
+                endGame(true); 
+            } else {
+                const difference = Math.abs(secretNumber - userGuess);
+                let proximityMessage = '';
+                let messageColor = '';
+
+                if (difference <= 10) {
+                    proximityMessage = ' but You\'re getting **closer**!';
+                    messageColor = '#7BC043'; // Greenish
+                } else if (difference <= 20) {
+                    proximityMessage = 'You\'re **far away**, but trying!';
+                    messageColor = '#00f0ff'; // Bluish
+                } else { 
+                    proximityMessage = 'You\'re **too far**!';
+                    messageColor = '#ff3366'; // Reddish
+                }
+
+                if (userGuess < secretNumber) {
+                    messageDisplay.innerHTML = `lower! ${proximityMessage}`;
+                } else {
+                    messageDisplay.innerHTML = `higher! ${proximityMessage}`;
+                }
+                messageDisplay.style.color = messageColor;
+            }
+            guessInput.value = ''; 
+        }
+
+        submitGuessBtn.addEventListener('click', checkGuess);
+        guessInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                checkGuess();
+            }
+        });
+
+        giveUpBtn.addEventListener('click', () => {
+            if (!gameOver) { 
+                endGame(false); 
+            }
+        });
+
+        resetGameBtn.addEventListener('click', initGame);
+
+        initGame();
+    </script>
+</body>
+</html>

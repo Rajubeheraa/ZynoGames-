@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors - ZynoGames</title>
+    <link rel="icon" type="image/x-icon" href="../images/zg.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            min-height: 100vh;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
+            padding-top: 40px; 
+        }
+        main {
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            max-width: 800px; /* Constrain width */
+            width: 100%;
+        }
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #00f0ff;
+            text-align: center;
+        }
+        .choices {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+            justify-content: center;
+        }
+        .choice-btn {
+            background-color: #ff3366;
+            color: #ffffff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .choice-btn:hover {
+            background-color: #e6004c;
+            transform: translateY(-3px);
+        }
+        .result-display {
+            background-color: #0d0d1a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 240, 255, 0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+        .result-display p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        #playerChoice, #computerChoice {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.8em;
+            color: #00f0ff;
+            margin: 10px 0;
+        }
+        #gameResult {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.2em;
+            color: #ff3366;
+            margin-top: 20px;
+        }
+        #scoreDisplay {
+            font-size: 1.1em;
+            color: #7BC043;
+            margin-top: 20px;
+        }
+        .reset-game-btn {
+            margin-top: 30px;
+            background-color: #00f0ff;
+            color: #0d0d1a;
+            padding: 12px 25px;
+            border-radius: 5px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: none; /* Hidden until game ends or manually reset */
+        }
+        .reset-game-btn:hover {
+            background-color: #00b3cc;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 2em;
+            }
+            .choice-btn {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            #playerChoice, #computerChoice {
+                font-size: 1.4em;
+            }
+            #gameResult {
+                font-size: 1.8em;
+            }
+            .result-display {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1 class="site-title" style="font-size: 1.8em;">ZynoGames - Rock Paper Scissors</h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../index.html#games-section">Games</a></li>
+                    <li><a href="../index.html#contact-section">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h2>Rock Paper Scissors</h2>
+        <div class="choices">
+            <button class="choice-btn" data-choice="rock">Rock</button>
+            <button class="choice-btn" data-choice="paper">Paper</button>
+            <button class="choice-btn" data-choice="scissors">Scissors</button>
+        </div>
+
+        <div class="result-display">
+            <p>Player Choice: <span id="playerChoice">?</span></p>
+            <p>Computer Choice: <span id="computerChoice">?</span></p>
+            <p id="gameResult">Choose your move!</p>
+            <p id="scoreDisplay">Score: Player 0 - Computer 0</p>
+            <button id="resetGameBtn" class="reset-game-btn">Play Another Round</button>
+        </div>
+    </main>
+
+    <footer class="main-footer" style="position: relative; width: 100%;">
+        <div class="container">
+            <h3>There are other games as well — explore them for a better experience.</h3>
+        </div>
+    </footer> 
+
+    <script>
+        const choiceButtons = document.querySelectorAll('.choice-btn');
+        const playerChoiceDisplay = document.getElementById('playerChoice');
+        const computerChoiceDisplay = document.getElementById('computerChoice');
+        const gameResultDisplay = document.getElementById('gameResult');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+
+        let playerScore = 0;
+        let computerScore = 0;
+
+        const choices = ['rock', 'paper', 'scissors'];
+
+        function getComputerChoice() {
+            const randomIndex = Math.floor(Math.random() * choices.length);
+            return choices[randomIndex];
+        }
+
+        function determineWinner(playerChoice, computerChoice) {
+            if (playerChoice === computerChoice) {
+                return 'It\'s a Tie!';
+            } else if (
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock') ||
+                (playerChoice === 'scissors' && computerChoice === 'paper')
+            ) {
+                playerScore++;
+                return 'You Win!';
+            } else {
+                computerScore++;
+                return 'You Lose!';
+            }
+        }
+
+        function updateScoreDisplay() {
+            scoreDisplay.textContent = `Score: Player ${playerScore} - Computer ${computerScore}`;
+        }
+
+        function handleChoice(event) {
+            const playerChoice = event.target.dataset.choice;
+            const computerChoice = getComputerChoice();
+
+            playerChoiceDisplay.textContent = playerChoice.toUpperCase();
+            computerChoiceDisplay.textContent = computerChoice.toUpperCase();
+
+            const result = determineWinner(playerChoice, computerChoice);
+            gameResultDisplay.textContent = result;
+
+            updateScoreDisplay();
+            resetGameBtn.style.display = 'block'; // Show reset button after a round
+        }
+
+        function resetGame() {
+            playerChoiceDisplay.textContent = '?';
+            computerChoiceDisplay.textContent = '?';
+            gameResultDisplay.textContent = 'Choose your move!';
+            playerScore = 0; 
+            computerScore = 0; 
+            updateScoreDisplay(); 
+            resetGameBtn.style.display = 'none'; 
+        }
+
+        choiceButtons.forEach(button => {
+            button.addEventListener('click', handleChoice);
+        });
+
+        resetGameBtn.addEventListener('click', resetGame);
+
+        updateScoreDisplay();
+    </script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-A-Mole - ZynoGames</title>
+    <link rel="icon" type="image/x-icon" href="../images/zg.png">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            background-color: #1a1a2e;
+            color: #e0e0e0;
+            font-family: 'Roboto', sans-serif;
+            padding-top: 40px; /* Space for fixed header */
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            max-width: 900px;
+            width: 100%;
+        }
+        h2 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: #00f0ff;
+            text-align: center;
+        }
+        .game-container-whack {
+            background-color: #0d0d1a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 240, 255, 0.2);
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .info-panel {
+            display: flex;
+            justify-content: space-around;
+            width: 100%; 
+            max-width: 500px;
+            margin-bottom: 30px;
+            font-family: 'Press Start 2P', cursive;
+            color: #ff3366;
+            font-size: 1.1em;
+        }
+        .mole-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 600px; /* Adjust as needed for holes */
+            margin-bottom: 30px;
+            background-color: #2a2a40; /* Ground color */
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .hole {
+            width: 150px;
+            height: 150px;
+            background-color: #1a1a2e; 
+            border-radius: 50%;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden; /* Moles pop out from here */
+            border: 4px solid #00f0ff;
+            box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+        .mole {
+            width: 100%;
+            height: 100%;
+            background-color: #ff3366; /* Mole color */
+            border-radius: 50%;
+            position: absolute;
+            bottom: -100%; /* Start hidden below hole */
+            left: 0;
+            transition: bottom 0.2s ease-out;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><text x="0" y="24" style="font-size: 20px; fill: %23FFD700;">🔨</text></svg>') 16 16, pointer; /* Custom hammer cursor */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: #0d0d1a;
+            font-family: 'Press Start 2P', cursive;
+        }
+        .mole.up {
+            bottom: 0; /* Pop up */
+        }
+        .start-btn, .reset-game-btn {
+            background-color: #00f0ff;
+            color: #0d0d1a;
+            padding: 15px 30px;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+        .start-btn:hover, .reset-game-btn:hover {
+            background-color: #00b3cc;
+        }
+        .reset-game-btn {
+            display: none; /* Hidden until game ends */
+        }
+        #message {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2em;
+            margin-top: 20px;
+            min-height: 1.5em;
+            color: #ff3366;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 600px) {
+            h2 {
+                font-size: 2em;
+            }
+            .info-panel {
+                font-size: 0.9em;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .mole-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile */
+                gap: 15px;
+                padding: 15px;
+            }
+            .hole {
+                width: 120px;
+                height: 120px;
+            }
+            .mole {
+                font-size: 2.5em;
+            }
+            .start-btn, .reset-game-btn {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+            #message {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <h1 class="site-title" style="font-size: 1.8em;">ZynoGames - Whack-A-Mole</h1>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="../index.html#games-section">Games</a></li>
+                    <li><a href="../index.html#contact-section">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h2>Whack-A-Mole</h2>
+        <div class="game-container-whack">
+            <div class="info-panel">
+                <div>Score: <span id="score">0</span></div>
+                <div>Time: <span id="time">30</span>s</div>
+            </div>
+            <div class="mole-grid" id="moleGrid">
+                </div>
+            <button id="startGameBtn" class="start-btn">Start Game</button>
+            <p id="message"></p>
+            <button id="resetGameBtn" class="reset-game-btn">Play Again</button>
+        </div>
+    </main>
+
+    <footer class="main-footer" style="position: relative; width: 100%;">
+        <div class="container">
+            <h3>There are other games as well — explore them for a better experience.</h3>
+        </div>
+    </footer> 
+
+    <script>
+        const moleGrid = document.getElementById('moleGrid');
+        const scoreDisplay = document.getElementById('score');
+        const timeDisplay = document.getElementById('time');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const messageDisplay = document.getElementById('message');
+        const resetGameBtn = document.getElementById('resetGameBtn');
+
+        let score = 0;
+        let timeRemaining = 30;
+        let gameInterval;
+        let molePopInterval;
+        let lastMole = null; // To prevent same mole popping consecutively
+        let gameActive = false;
+        let moles = []; // Array to store mole elements
+
+        const moleContent = ['😠', '😂', '😎', '😜', '😇', '😈']; // Emojis for moles
+
+        function createMoles() {
+            moleGrid.innerHTML = ''; // Clear previous moles
+            moles = []; // Reset moles array
+            for (let i = 0; i < 9; i++) { 
+                const hole = document.createElement('div');
+                hole.classList.add('hole');
+                const mole = document.createElement('div');
+                mole.classList.add('mole');
+                mole.textContent = moleContent[Math.floor(Math.random() * moleContent.length)]; // Random emoji
+                mole.addEventListener('click', whackMole);
+                hole.appendChild(mole);
+                moleGrid.appendChild(hole);
+                moles.push(mole); // Store reference to mole element
+            }
+        }
+
+        function randomMole() {
+            const index = Math.floor(Math.random() * moles.length);
+            const selectedMole = moles[index];
+
+            if (selectedMole === lastMole) {
+                return randomMole(); // Try again if it's the same as last one
+            }
+
+            lastMole = selectedMole;
+            return selectedMole;
+        }
+
+        function popMole() {
+            moles.forEach(mole => mole.classList.remove('up')); // Hide all moles
+
+            const moleToPop = randomMole();
+            moleToPop.classList.add('up');
+
+            // Set a timeout for the mole to go down automatically if not whacked
+            setTimeout(() => {
+                moleToPop.classList.remove('up');
+            }, Math.random() * 800 + 400); // Mole stays up for 0.4 to 1.2 seconds
+        }
+
+        function startGame() {
+            if (gameActive) return; // Prevent starting multiple times
+            gameActive = true;
+            score = 0;
+            timeRemaining = 30;
+            scoreDisplay.textContent = score;
+            timeDisplay.textContent = timeRemaining;
+            messageDisplay.textContent = '';
+            startGameBtn.style.display = 'none';
+            resetGameBtn.style.display = 'none';
+
+            createMoles(); // Ensure moles are ready
+
+            molePopInterval = setInterval(popMole, Math.random() * 1000 + 500); // Moles pop every 0.5 to 1.5 seconds
+
+            gameInterval = setInterval(() => {
+                timeRemaining--;
+                timeDisplay.textContent = timeRemaining;
+                if (timeRemaining <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function whackMole(event) {
+            if (!gameActive) return;
+            score++;
+            scoreDisplay.textContent = score;
+            event.target.classList.remove('up'); // Make mole go down immediately
+            event.stopPropagation(); // Prevent event bubbling if clicking hole background
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(molePopInterval);
+            gameActive = false;
+            moles.forEach(mole => mole.classList.remove('up')); // Hide any remaining moles
+            messageDisplay.textContent = `Game Over! Your score: ${score}`;
+            messageDisplay.style.color = '#ff3366';
+            resetGameBtn.style.display = 'block';
+        }
+
+        startGameBtn.addEventListener('click', startGame);
+        resetGameBtn.addEventListener('click', startGame); // Reset button also starts a new game
+
+        // Initial setup
+        createMoles();
+    </script>
+</body>
+</html>
